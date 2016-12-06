@@ -1,5 +1,12 @@
-# TODO: This needs to be a little more flexible
-SAMPLES=["Fecal_1uM_QE1", "Fecal_1uM_QE2", "Fecal_1uM_QE3"]
+import glob
+
+files = glob.glob("data/*")
+bfiles = list(map(lambda x: os.path.splitext(x)[0], files))
+SAMPLES = list(map(lambda x: x.split('/')[1], bfiles))
+
+rule all:
+    input:
+        "data/table.csv"
 
 rule file_converter:
     input:
@@ -39,12 +46,11 @@ rule linker:
      shell:
         "FeatureLinkerUnlabeledQT -in {input.featurexml} -out {output}"
 
+# TODO: Need to create rule for creating bucket table
 rule tabular:
      input:
         "linked/file.consensusXML"
      output:
         "data/table.csv"
      shell:
-          "TextExporter -in {input} -out {output}"
-
-# TODO: Need to create rule for creating bucket table
+       "TextExporter -in {input} -out {output}"
