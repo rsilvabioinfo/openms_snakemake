@@ -6,7 +6,7 @@ SAMPLES = list(map(lambda x: x.split('/')[1], bfiles))
 
 rule all:
     input:
-        "data/table.csv"
+	"data/metabolomics-table.tsv"
 
 rule file_converter:
     input:
@@ -54,3 +54,11 @@ rule tabular:
         "data/table.csv"
      shell:
        "TextExporter -in {input} -out {output}"
+
+rule convert:
+	input:
+	  "data/table.csv"
+	output:
+	  "data/metabolomics-table.tsv"
+	shell:
+	  "python openms2biom.py -i {input} -o {output}"
