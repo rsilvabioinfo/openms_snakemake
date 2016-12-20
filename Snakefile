@@ -6,7 +6,7 @@ SAMPLES = list(map(lambda x: x.split('/')[1], bfiles))
 
 rule all:
     input:
-	"data/metabolomics-table.tsv"
+        "data/metabolomics_table.tsv"
 
 rule file_converter:
     input:
@@ -28,25 +28,24 @@ rule feature_finding:
     shell:
         "FeatureFinderMetabo -ini {input.ini} -in {input.mzml} -out {output}"
 
-# TODO: need ini files
 rule align:
      input:
+        alini="params/mapalignerposeclustering.ini",
         featurexml=expand("features/{sample}.featureXML", sample=SAMPLES)
      output:
         featurexml=expand("aligned/{sample}.featureXML", sample=SAMPLES)
      shell:
-        "MapAlignerPoseClustering -in {input.featurexml} -out {output.featurexml}"
+        "MapAlignerPoseClustering -ini {input.alini} -in {input.featurexml} -out {output.featurexml}"
 
-# TODO: need ini files
 rule linker:
      input:
+        lkini="params/featurelinkerunlabeledqt.ini",
         featurexml=expand("aligned/{sample}.featureXML", sample=SAMPLES)
      output:
         "linked/file.consensusXML"
      shell:
-        "FeatureLinkerUnlabeledQT -in {input.featurexml} -out {output}"
+        "FeatureLinkerUnlabeledQT -ini {input.lkini} -in {input.featurexml} -out {output}"
 
-# TODO: Need to create rule for creating bucket table
 rule tabular:
      input:
         "linked/file.consensusXML"
@@ -55,10 +54,12 @@ rule tabular:
      shell:
        "TextExporter -in {input} -out {output}"
 
+# TODO: test different output tables
 rule convert:
 	input:
 	  "data/table.csv"
 	output:
-	  "data/metabolomics-table.tsv"
+	  "data/metabolomics_table.tsv"
 	shell:
 	  "python openms2biom.py -i {input} -o {output}"
+
